@@ -51,8 +51,8 @@ contract AVAXGodsGame is ERC1155,Ownable,ERC1155Supply{
         BattleStatus battleStatus;
         bytes32 battleHash; // hash of battle name
         string name; // battle name
-        address[2] battle; // players in the battle
-        uint8[2] move;
+        address[2] players; // players in the battle
+        uint8[2] moves;
         address winner;
     }
 
@@ -209,6 +209,180 @@ contract AVAXGodsGame is ERC1155,Ownable,ERC1155Supply{
         
     }
 
-    
+    /// creating random number
+    function _createRandomNumber(
+        uint256 _max,
+        address _sender
+        ) view internal returns (uint256) {
+        uint256 random = uint256(
+            keccak256(abi.encodePacked(block.difficulty , block.timestamp , _sender))
+        );
 
+        uint256 randomValue = random % _max;
+        if (randomValue == 0) {
+            randomValue = _max / 2;
+        }
+
+        return randomValue;
+    }
+
+    // creating Game token internal
+    function _createGameToken(string memory _name) internal returns (GameToken memory) {
+        uint256 randAttackStrength = _createRandomNumber(MAX_ATTACK_DEFEND_STRENGTH, _msgSender());
+
+        uint256 randDefenseStrength = MAX_ATTACK_DEFEND_STRENGTH - randAttackStrength;
+
+        uint256 randomId = uint8(
+            uint256(keccak256(abi.encodePacked(block.timestamp , msg.sender))) %100
+        );
+
+        randomId = randomId % 6;
+        if (randomId == 0) {
+            randomId++;
+        }
+
+        GameToken memory gameTokenNew = GameToken(randomId , _name , randAttackStrength , randDefenseStrength);
+        uint256 _id = gameTokens.length;
+        gameTokens.push(gameTokenNew);
+        playerTokenInfo[_msgSender()] = _id;
+
+        _mint(_msgSender(), randomId, 1, "0x0");
+
+        totalSupply++;
+
+        NewGameToken(_msgSender(), randomId, randAttackStrength, randDefenseStrength);
+
+        return gameTokenNew;
+    }
+
+    // creating new game token
+    function _createRandomGameToken(string memory _name) public {
+        require(!getPlayer(_msgSender()).inBattle, "player is in a battle!");
+        require(isPlayer(_msgSender()), "Player has not registered yet!");
+
+        _createGameToken(_name);
+    }
+
+    // getting total supply
+    function getTotalSupply() view external returns (uint256) {
+        return totalSupply;
+    }
+
+    /// creating a battle
+    function createBattle(string memory _name)
+    external returns(Battle memory) {
+        // checking if player has registered or not
+         require(isPlayer(_msgSender()), "Player has not registered yet!");
+         require(isBattle(_name), "battle already exists");
+        
+        bytes32 battleHash = keccak256(abi.encode(_name));
+
+        Battle memory _battle = Battle(
+           BattleStatus.PENDING, // battle status set to pending
+            battleHash, // hash of battle name
+            _name, // battle name
+            [_msgSender() , address(0)], // players in the battle. player 2 is temporary empty until a player joins
+            [0,0],
+            address(0) // winner address; empty until battle ends
+        )
+
+        uint256 _id = battleInfo.length;
+        battleInfo[_name] = _id;
+        battles.push(_battle);
+
+        return _battle;
+    }
+
+    function joinBattle(string memory _name) external returns (Battle memory) {
+        Battle memory _battle = getBattle(_name);
+
+        require(_battle.battleStatus === BattleStatus.PENDING, "battle already started!!!");
+        require(_battle.players[0] !== msg.sender, "Only player two can join a battle");
+        require(!getPlayer(msg.sender).inBattle, "player already in battle");
+
+        _battle.battleStatus = BattleStatus.STARTED;
+        _battle.players[1] = msg.sender;
+        updateBattle(_name , _battle);
+
+        players[playerInfo[_battle.players[0]]].inBattle = true;
+        players[playerInfo[_battle.players[1]]].inBattle = true;
+
+        emit NewBattle(_battle.name ,_battle.players[0], msg.sender );
+
+        return _battle;
+    }
+
+    // getting battle moves
+    function getBattleMoves(string memory _name) view public returns (uint256 , uint256 ) {
+        Battle memory _battle = getBattle(_name);
+        return (_battle.moves[0], _battle.moves[1]);
+    }
+
+    // setting player move
+    function _setPlayerMove(
+        string memory _name,
+        uint8 _choice,
+        uint256 _player
+    ) internal{
+        require(
+            _choice === 1 || _choice === 2,
+            "Choice should be either 1 or 2!"
+        );
+
+        require(
+            _choice == 1 ? getPlayer(msg.sender).playerMana >= 3 : true,
+            "Mana not sufficient for attacking!"
+        );
+        battles[battleInfo[_battleName]].moves[_player] = _choice;
+    }
+
+    // User chooses attack or defense move for battle
+    function attackOrDefense(string memory _name , uint8 _choice) external {
+        Battle memory _battle = getBattle(_name);
+        require(_battle.battleStatus === BattleStatus.STARTED, "battle not started yet!!!");
+        require(_battle.battleStatus === BattleStatus.ENDED, "battle had already ended!!!");
+        require(msg.sender === _battle.players[0] || msg.sender === _battle.players[1], "you must be in battle");
+        require(
+            _battle.moves[_battle.players[0] === msg.sender ? 0 : 1] === 0,
+            "You have already made a move!"
+        );
+
+        _setPlayerMove(
+            _name,
+            _choice,
+            _battle.players[0] === msg.sender ? 0 : 1
+        );
+
+        _battle  = getBattle(_name);
+        uint _movesLeft = 2 -
+            (_battle.moves[0] == 0 ? 0 : 1) -
+            (_battle.moves[1] == 0 ? 0 : 1);
+        
+        emit BattleMove(_name , _movesLeft === 1 ? true : false);
+
+        if(_movesLeft === 0){
+            _awaitBattleResult(_name);
+        }
+
+    }
+
+    // Awaits battle results
+    function _awaitBattleResult(string memory _name) internal {
+        Battle memory _battle = getBattle(_name);
+
+        require(
+            msg.sender == _battle.players[0] ||
+                msg.sender == _battle.players[1],
+            "Only players in this battle can make a move"
+        );
+        require(
+            _battle.moves[0] !=== 0 && _battle.moves[1] !=== 0
+            ,
+             "Players must make a move");
+        _resolveBattle(_battle);
+
+    }
+
+    
+    /// Resolve battle function to determine winner and loser of battle
 }
