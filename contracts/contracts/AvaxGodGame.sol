@@ -10,7 +10,7 @@ import "@openzeppelin/contracts/token/ERC1155/extensions/ERC1155Supply.sol";
 /// @author Mojtaba.web3
 
 
-contract AVAXGodsGame {
+contract AVAXGodsGame is ERC1155,Ownable,ERC1155Supply{
     string public baseURI; // baseURI where token metadata is stored
     uint256 public totalSupply; // Total number of tokens minted
     uint256 public constant DEVIL = 0;
@@ -137,4 +137,78 @@ contract AVAXGodsGame {
     }
 
     // events
+    /// new player event
+    event NewPlayer(address indexed owner, string name);
+
+    /// new battle event
+    event NewBattle(
+        string battleName,
+        address indexed player1,
+        address indexed player2
+    );
+
+    /// battle end event
+    event BattleEnded(
+        string battleName,
+        address indexed winner,
+        address indexed loser
+    );
+
+    /// battle move event
+    event BattleMove(string indexed battleName, bool indexed isFirstMove);
+
+    /// new game token evevnt
+    event NewGameToken(
+        address indexed owner,
+        uint256 id,
+        uint256 attackStrength,
+        uint256 defenseStrength
+    );
+
+    /// ending round event
+    event RoundEnded(address[2] damagedPlayers);
+
+    /// contract  constructor
+    constructor(string memory _metadataURI) ERC1155(_metadataURI){
+        // set base URI
+        baseURI = _metadataURI;
+        initialize();
+    }
+
+    // 
+    function setURI(string memory newuri) public onlyOwner() {
+        _setURI(newuri);
+    }
+
+    // initializing the game
+    function initialize() private {
+        gameTokens.push(GameToken("",0,0,0));
+        players.push(Player(address(0), "", 0, 0, false));
+        battles.push(
+            Battle(
+                BattleStatus.PENDING,
+                bytes32(0),
+                "",
+                [address(0), address(0)],
+                [0, 0],
+                address(0)
+            )
+        );
+    }
+
+    /// register a player
+    function registerPlayer(string memory _name , string memory _gameTokenName) external {
+        require(!isPlayer(_msgSender()), "player already registered");
+        uint256 _id = players.length;
+        players.push(Player( msg.sender ,_name,10, 25,false));
+        playerInfo[_msgSender()] = _id;
+
+        createRandomGameToken(_gameTokenName);
+
+        emit NewPlayer(_msgSender(), _name);
+        
+    }
+
+    
+
 }
