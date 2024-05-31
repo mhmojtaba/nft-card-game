@@ -1,27 +1,31 @@
 import { ethers } from "hardhat";
+// biome-ignore lint/style/useNodejsImportProtocol: <explanation>
 import console from "console";
 
-const _metadataUri = "https://gateway.pinata.cloud/ipfs/https://gateway.pinata.cloud/ipfs/QmX2ubhtBPtYw75Wrpv6HLb1fhbJqxrnbhDo1RViW3oVoi";
+const _metadataUri =
+	"https://gateway.pinata.cloud/ipfs/https://gateway.pinata.cloud/ipfs/QmX2ubhtBPtYw75Wrpv6HLb1fhbJqxrnbhDo1RViW3oVoi";
 
 async function deploy(name: string, ...params: [string]) {
-  const contractFactory = await ethers.getContractFactory(name);
+	const contractFactory = await ethers.getContractFactory(name);
 
-  return await contractFactory.deploy(...params).then((f: { deployed: () => any; }) => f.deployed());
+	return await contractFactory
+		.deploy(...params)
+		.then((f: { deployed: () => any }) => f.deployed());
 }
 
 async function main() {
-  const [admin] = await ethers.getSigners();
+	const [admin] = await ethers.getSigners();
 
-  console.log(`Deploying a smart contract...`);
+	console.log(`'Deploying a smart contract...'`);
 
-  const AVAXGods = (await deploy("AVAXGods", _metadataUri)).connect(admin);
+	const AVAXGods = (await deploy("AVAXGods", _metadataUri)).connect(admin);
 
-  console.log({ AVAXGods: AVAXGods.address });
+	console.log({ AVAXGods: AVAXGods.address });
 }
 
 main()
-  .then(() => process.exit(0))
-  .catch((error) => {
-    console.error(error);
-    process.exit(1);
-  });
+	.then(() => process.exit(0))
+	.catch((error) => {
+		console.error(error);
+		process.exit(1);
+	});
