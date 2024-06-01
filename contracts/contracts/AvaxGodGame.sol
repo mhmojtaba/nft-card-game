@@ -10,9 +10,9 @@ import "@openzeppelin/contracts/token/ERC1155/extensions/ERC1155Supply.sol";
 /// @author Mojtaba.web3
 
 
-contract AVAXGodsGame is ERC1155,Ownable,ERC1155Supply{
+contract AVAXGodsGame is ERC1155, Ownable, ERC1155Supply{
     string public baseURI; // baseURI where token metadata is stored
-    uint256 public totalSupply; // Total number of tokens minted
+    uint256 public __totalSupply; // Total number of tokens minted
     uint256 public constant DEVIL = 0;
     uint256 public constant GRIFFIN = 1;
     uint256 public constant FIREBIRD = 2;
@@ -42,7 +42,7 @@ contract AVAXGodsGame is ERC1155,Ownable,ERC1155Supply{
         address playerAddress; // player wallet address
         string playerName; // set by player
         uint256 playerMana;
-        uint256 playerHelth;
+        uint256 playerHealth;
         bool inBattle;
     }
 
@@ -203,7 +203,7 @@ contract AVAXGodsGame is ERC1155,Ownable,ERC1155Supply{
         players.push(Player( msg.sender ,_name,10, 25,false));
         playerInfo[_msgSender()] = _id;
 
-        createRandomGameToken(_gameTokenName);
+        _createRandomGameToken(_gameTokenName);
 
         emit NewPlayer(_msgSender(), _name);
         
@@ -241,14 +241,14 @@ contract AVAXGodsGame is ERC1155,Ownable,ERC1155Supply{
             randomId++;
         }
 
-        GameToken memory gameTokenNew = GameToken(randomId , _name , randAttackStrength , randDefenseStrength);
+        GameToken memory gameTokenNew = GameToken( _name , randomId , randAttackStrength , randDefenseStrength);
         uint256 _id = gameTokens.length;
         gameTokens.push(gameTokenNew);
         playerTokenInfo[_msgSender()] = _id;
 
         _mint(_msgSender(), randomId, 1, "0x0");
 
-        totalSupply++;
+        __totalSupply++;
 
         NewGameToken(_msgSender(), randomId, randAttackStrength, randDefenseStrength);
 
@@ -265,7 +265,7 @@ contract AVAXGodsGame is ERC1155,Ownable,ERC1155Supply{
 
     // getting total supply
     function getTotalSupply() view external returns (uint256) {
-        return totalSupply;
+        return __totalSupply;
     }
 
     /// creating a battle
@@ -325,7 +325,7 @@ contract AVAXGodsGame is ERC1155,Ownable,ERC1155Supply{
         uint256 _player
     ) internal{
         require(
-            _choice === 1 || _choice === 2,
+            _choice == 1 || _choice == 2,
             "Choice should be either 1 or 2!"
         );
 
@@ -333,24 +333,24 @@ contract AVAXGodsGame is ERC1155,Ownable,ERC1155Supply{
             _choice == 1 ? getPlayer(msg.sender).playerMana >= 3 : true,
             "Mana not sufficient for attacking!"
         );
-        battles[battleInfo[_battleName]].moves[_player] = _choice;
+        battles[battleInfo[_name]].moves[_player] = _choice;
     }
 
     // User chooses attack or defense move for battle
     function attackOrDefense(string memory _name , uint8 _choice) external {
         Battle memory _battle = getBattle(_name);
-        require(_battle.battleStatus === BattleStatus.STARTED, "battle not started yet!!!");
-        require(_battle.battleStatus === BattleStatus.ENDED, "battle had already ended!!!");
-        require(msg.sender === _battle.players[0] || msg.sender === _battle.players[1], "you must be in battle");
+        require(_battle.battleStatus == BattleStatus.STARTED, "battle not started yet!!!");
+        require(_battle.battleStatus == BattleStatus.ENDED, "battle had already ended!!!");
+        require(msg.sender == _battle.players[0] || msg.sender == _battle.players[1], "you must be in battle");
         require(
-            _battle.moves[_battle.players[0] === msg.sender ? 0 : 1] === 0,
+            _battle.moves[_battle.players[0] == msg.sender ? 0 : 1] == 0,
             "You have already made a move!"
         );
 
         _setPlayerMove(
             _name,
             _choice,
-            _battle.players[0] === msg.sender ? 0 : 1
+            _battle.players[0] == msg.sender ? 0 : 1
         );
 
         _battle  = getBattle(_name);
@@ -358,9 +358,9 @@ contract AVAXGodsGame is ERC1155,Ownable,ERC1155Supply{
             (_battle.moves[0] == 0 ? 0 : 1) -
             (_battle.moves[1] == 0 ? 0 : 1);
         
-        emit BattleMove(_name , _movesLeft === 1 ? true : false);
+        emit BattleMove(_name , _movesLeft == 1 ? true : false);
 
-        if(_movesLeft === 0){
+        if(_movesLeft == 0){
             _awaitBattleResult(_name);
         }
 
@@ -376,7 +376,7 @@ contract AVAXGodsGame is ERC1155,Ownable,ERC1155Supply{
             "Only players in this battle can make a move"
         );
         require(
-            _battle.moves[0] !=== 0 && _battle.moves[1] !=== 0
+            _battle.moves[0] != 0 && _battle.moves[1] != 0
             ,
              "Players must make a move");
         _resolveBattle(_battle);
@@ -483,7 +483,7 @@ contract AVAXGodsGame is ERC1155,Ownable,ERC1155Supply{
         updateBattle(_battle.name, _battle);
 
         // Reset random attack and defense strength
-        uint256 _randomAttackStrengthPlayer1 = _createRandomNum(
+        uint256 _randomAttackStrengthPlayer1 = _createRandomNumber(
             MAX_ATTACK_DEFEND_STRENGTH,
             _battle.players[0]
         );
@@ -493,7 +493,7 @@ contract AVAXGodsGame is ERC1155,Ownable,ERC1155Supply{
             MAX_ATTACK_DEFEND_STRENGTH -
             _randomAttackStrengthPlayer1;
 
-        uint256 _randomAttackStrengthPlayer2 = _createRandomNum(
+        uint256 _randomAttackStrengthPlayer2 = _createRandomNumber(
             MAX_ATTACK_DEFEND_STRENGTH,
             _battle.players[1]
         );
@@ -578,7 +578,7 @@ contract AVAXGodsGame is ERC1155,Ownable,ERC1155Supply{
         uint256[] memory ids,
         uint256[] memory amounts,
         bytes memory data
-    ) internal override(ERC1155, ERC1155Supply) {
+   ) internal override(ERC1155, ERC1155Supply) {
         super._beforeTokenTransfer(operator, from, to, ids, amounts, data);
     }
     
