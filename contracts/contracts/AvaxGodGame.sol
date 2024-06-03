@@ -7,7 +7,7 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/token/ERC1155/extensions/ERC1155Supply.sol";
 
 /// @author this contract handle token management and logics for game
-/// @author Mojtaba.web3
+/// @author powered by Mojtaba.web3
 
 
 contract AVAXGodsGame is ERC1155, Ownable, ERC1155Supply{
