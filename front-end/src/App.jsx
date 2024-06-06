@@ -1,8 +1,23 @@
 /* eslint-disable react-refresh/only-export-components */
-import { HOC } from "./components";
+import { useState } from "react";
+import { HOC, CustomInput } from "./components";
+import { useGlobalContext } from "./context";
 
 function App() {
-  return <div></div>;
+  const { walletAddress, contract } = useGlobalContext();
+  const [playerName, setPlayerName] = useState("");
+  console.log(walletAddress);
+  console.log(contract);
+  return (
+    <div className="flex flex-col">
+      <CustomInput
+        label="Name"
+        placeholder="enter your name"
+        value={playerName}
+        handler={(e) => setPlayerName(e)}
+      />
+    </div>
+  );
 }
 
 export default HOC(

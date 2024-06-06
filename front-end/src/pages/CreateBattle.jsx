@@ -3,7 +3,11 @@
 import { HOC } from "../components";
 
 const CreateBattle = () => {
-  return <div></div>;
+  return (
+    <div>
+      <h1>Hello </h1>
+    </div>
+  );
 };
 
 export default HOC(
