@@ -1,18 +1,26 @@
 /* eslint-disable react/prop-types */
-import React from "react";
+import styles from "../styles";
 
-const CustomInput = ({ placeholder, value, handler, label }) => {
+const regex = /^[a-zA-Z0-9]+$/;
+
+const CustomInput = ({ placeholder, value, changeHandler, label }) => {
   return (
-    <div>
-      <label htmlFor="input">{label}</label>
+    <>
+      <label htmlFor="input" className={styles.label}>
+        {label}
+      </label>
       <input
         id="input"
         placeholder={placeholder}
         type="text"
         value={value}
-        onChange={handler}
+        onChange={(e) => {
+          if (e.target.value === "" || regex.test(e.target.value))
+            changeHandler(e.target.value);
+        }}
+        className={styles.input}
       />
-    </div>
+    </>
   );
 };
 

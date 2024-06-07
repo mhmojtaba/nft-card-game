@@ -1,10 +1,11 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable react/prop-types */
 /* eslint-disable react-refresh/only-export-components */
-import { useState, useRef, useEffect, createContext, useContext } from "react";
+import { useState, useEffect, createContext, useContext } from "react";
 import { ethers } from "ethers";
 import Web3modal from "web3modal";
-import { useNavigate } from "react-router-dom";
 import { ABI, ADDRESS } from "../contract";
+import toast from "react-hot-toast";
 
 const GlobalContext = createContext();
 
@@ -22,7 +23,8 @@ export const GlobalContextProvider = ({ children }) => {
       console.log(accounts);
       accounts && setWalletAddress(accounts[0]);
     } catch (error) {
-      console.log(error.message);
+      console.log(error?.message);
+      toast.error(error?.message);
     }
   };
 
@@ -33,20 +35,23 @@ export const GlobalContextProvider = ({ children }) => {
   }, []);
 
   //* set the contract
+
+  const setSmartContract = async () => {
+    const web3modal = new Web3modal();
+    const connection = await web3modal.connect();
+    console.log(connection);
+
+    const newProvider = new ethers.providers.Web3Provider(window.ethereum);
+    const newSigner = newProvider.getSigner();
+
+    const newContract = new ethers.Contract(ADDRESS, ABI, newSigner);
+    console.log(newContract);
+    setContract(newContract);
+    setProvider(newProvider);
+    console.log(provider);
+  };
+
   useEffect(() => {
-    const setSmartContract = async () => {
-      const web3modal = new Web3modal();
-      const connection = await web3modal.connect();
-      const newProvider = new ethers.providers.Web3Provider(connection);
-      const newSigner = newProvider.getSigner();
-
-      const newContract = new ethers.Contract(ADDRESS, ABI, newSigner);
-      console.log(newContract);
-      setContract(newContract);
-      setProvider(newProvider);
-      console.log(provider);
-    };
-
     setSmartContract();
   }, []);
 
