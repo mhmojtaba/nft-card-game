@@ -6,6 +6,8 @@ import { ethers } from "ethers";
 import Web3modal from "web3modal";
 import { ABI, ADDRESS } from "../contract";
 import toast from "react-hot-toast";
+import { createEventsListeners } from "./eventListeners";
+import { useNavigate } from "react-router-dom";
 
 const GlobalContext = createContext();
 
@@ -13,6 +15,7 @@ export const GlobalContextProvider = ({ children }) => {
   const [walletAddress, setWalletAddress] = useState("");
   const [provider, setProvider] = useState("");
   const [contract, setContract] = useState("");
+  const navigate = useNavigate();
 
   // * set the wallet address
   const updateWalletAddress = async () => {
@@ -54,6 +57,17 @@ export const GlobalContextProvider = ({ children }) => {
   useEffect(() => {
     setSmartContract();
   }, []);
+
+  useEffect(() => {
+    if (contract) {
+      createEventsListeners({
+        navigate,
+        contract,
+        provider,
+        walletAddress,
+      });
+    }
+  }, [contract]);
 
   return (
     <GlobalContext.Provider

@@ -11,7 +11,7 @@ ReactDOM.createRoot(document.getElementById("root")).render(
     <GlobalContextProvider>
       <Routes>
         <Route path="/" element={<App />} />
-        <Route path="/create" element={<CreateBattle />} />
+        <Route path="/create-battle" element={<CreateBattle />} />
       </Routes>
       <Toaster />
     </GlobalContextProvider>

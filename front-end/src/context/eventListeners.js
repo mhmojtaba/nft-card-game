@@ -1,5 +1,6 @@
 import { ethers } from "ethers";
 import { ABI } from "../contract";
+import toast from "react-hot-toast";
 
 const addNewEvent = (filter, provider, cb) => {
   provider.removeListener(filter); //preventing multiple listener for the same event
@@ -9,6 +10,19 @@ const addNewEvent = (filter, provider, cb) => {
   });
 };
 
-export const createEventsListeners = () => {
-  const provider = new ethers.providers.Web3Provider(window.ethereum);
+export const createEventsListeners = ({
+  navigate,
+  contract,
+  provider,
+  walletAddress,
+}) => {
+  const newPlayerEventFilter = contract.filters.NewPlayer();
+
+  addNewEvent(newPlayerEventFilter, provider, ({ args }) => {
+    console.log(args);
+    if (walletAddress == args.owner) {
+      toast.success("Player registered");
+      navigate("/");
+    }
+  });
 };

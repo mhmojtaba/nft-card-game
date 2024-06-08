@@ -1,12 +1,15 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable react-refresh/only-export-components */
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { HOC, CustomInput, CustomButton } from "./components";
 import { useGlobalContext } from "./context";
 import toast from "react-hot-toast";
+import { useNavigate } from "react-router-dom";
 
 function App() {
   const { walletAddress, contract } = useGlobalContext();
   const [playerName, setPlayerName] = useState("");
+  const navigate = useNavigate();
   // console.log(walletAddress);
 
   const handleClick = async () => {
@@ -23,6 +26,17 @@ function App() {
       toast.error(error?.message);
     }
   };
+
+  useEffect(() => {
+    const checkPlayerToken = async () => {
+      const playerExists = await contract.isPlayer(walletAddress);
+      const playerTokenExists = await contract.isPlayerToken(walletAddress);
+
+      if (playerExists && playerTokenExists) navigate("/create-battle");
+    };
+
+    if (contract) checkPlayerToken();
+  }, [contract]);
 
   return (
     <div className="flex flex-col">
