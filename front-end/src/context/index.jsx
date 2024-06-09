@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable react/prop-types */
 /* eslint-disable react-refresh/only-export-components */
@@ -16,6 +17,13 @@ export const GlobalContextProvider = ({ children }) => {
   const [provider, setProvider] = useState("");
   const [contract, setContract] = useState("");
   const [battleName, setBattleName] = useState("");
+  const [gameData, setGameData] = useState({
+    players: [],
+    pendingBattles: [],
+    activeBattle: null,
+  });
+  const [updateGameData, setUpdateGameData] = useState(0);
+
   const navigate = useNavigate();
 
   // * set the wallet address
@@ -32,6 +40,7 @@ export const GlobalContextProvider = ({ children }) => {
     }
   };
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
   useEffect(() => {
     updateWalletAddress();
 
@@ -55,10 +64,12 @@ export const GlobalContextProvider = ({ children }) => {
     console.log(provider);
   };
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
   useEffect(() => {
     setSmartContract();
   }, []);
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
   useEffect(() => {
     if (contract) {
       createEventsListeners({
@@ -66,9 +77,41 @@ export const GlobalContextProvider = ({ children }) => {
         contract,
         provider,
         walletAddress,
+        setUpdateGameData,
       });
     }
   }, [contract]);
+
+  //* set the game data
+  // biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
+  useEffect(() => {
+    //fetching game data
+    const getGameData = async () => {
+      const fetchBattles = await contract.getAllBattles();
+      const pendingBattles = fetchBattles.filter(
+        (battle) => battle.battleStatus === 0
+      );
+      let activeBattle = null;
+      // biome-ignore lint/complexity/noForEach: <explanation>
+      fetchBattles.forEach((battle) => {
+        //
+        if (
+          battle.players.find(
+            (player) =>
+              player.toLowerCase() === walletAddress.toLocaleLowerCase()
+          )
+        ) {
+          if (battle.winner.startsWith("0x000")) {
+            activeBattle = battle;
+          }
+        }
+      });
+      fetchBattles &&
+        setGameData({ pendingBattles: pendingBattles.slice(1), activeBattle });
+    };
+
+    if (contract) getGameData();
+  }, [contract, updateGameData]);
 
   return (
     <GlobalContext.Provider
@@ -77,6 +120,7 @@ export const GlobalContextProvider = ({ children }) => {
         contract,
         battleName,
         setBattleName,
+        gameData,
       }}
     >
       {children}

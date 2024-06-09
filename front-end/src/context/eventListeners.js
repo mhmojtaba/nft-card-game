@@ -15,14 +15,31 @@ export const createEventsListeners = ({
   contract,
   provider,
   walletAddress,
+  setUpdateGameData,
 }) => {
   const newPlayerEventFilter = contract.filters.NewPlayer();
 
   addNewEvent(newPlayerEventFilter, provider, ({ args }) => {
-    console.log(args);
-    if (walletAddress == args.owner) {
+    console.log("new player added", args);
+    if (walletAddress === args.owner) {
       toast.success("Player registered");
       navigate("/");
     }
+  });
+
+  ///
+  const newBattleEventFilter = contract.filters.NewBattle();
+
+  addNewEvent(newBattleEventFilter, provider, ({ args }) => {
+    //
+    console.log("new battle started", args, walletAddress);
+
+    if (
+      walletAddress.toLowerCase() === args.player1.toLowerCase() ||
+      walletAddress.toLowerCase() === args.player2.toLowerCase()
+    )
+      navigate(`/battle/${args.battleName}`);
+
+    setUpdateGameData((prev) => prev + 1);
   });
 };

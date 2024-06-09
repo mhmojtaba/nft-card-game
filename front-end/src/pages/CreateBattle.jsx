@@ -4,12 +4,17 @@ import { Link } from "react-router-dom";
 import { CustomButton, CustomInput, GameLoad, HOC } from "../components";
 import { useGlobalContext } from "../context";
 import styles from "../styles";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 
 const CreateNewBattle = () => {
-  const { contract, battleName, setBattleName } = useGlobalContext();
+  const { contract, battleName, setBattleName, gameData } = useGlobalContext();
   const [wait, setWait] = useState(false);
+
+  // biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
+  useEffect(() => {
+    if (gameData?.activeBattle?.battleStatus === 0) setWait(true);
+  }, [gameData]);
 
   const createBattleHandler = async () => {
     if (!battleName || !battleName.trim()) return;
@@ -41,7 +46,7 @@ const CreateNewBattle = () => {
         Or{"  "}
         <Link
           to={"/join-battle"}
-          className="underline underline-offset-2 cursor-pointer hover:text-red-600"
+          className=" underline-offset-2 text-red-600 cursor-pointer hover:underline"
         >
           Join
         </Link>
