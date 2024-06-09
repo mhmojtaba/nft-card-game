@@ -15,6 +15,7 @@ export const GlobalContextProvider = ({ children }) => {
   const [walletAddress, setWalletAddress] = useState("");
   const [provider, setProvider] = useState("");
   const [contract, setContract] = useState("");
+  const [battleName, setBattleName] = useState("");
   const navigate = useNavigate();
 
   // * set the wallet address
@@ -74,6 +75,8 @@ export const GlobalContextProvider = ({ children }) => {
       value={{
         walletAddress,
         contract,
+        battleName,
+        setBattleName,
       }}
     >
       {children}

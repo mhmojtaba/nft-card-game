@@ -1,3 +1,4 @@
-import CreateBattle from "./CreateBattle";
+import CreateNewBattle from "./CreateBattle";
+import JoinBattle from "./JoinBattle";
 
-export { CreateBattle };
+export { CreateNewBattle, JoinBattle };
