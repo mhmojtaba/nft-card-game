@@ -105,8 +105,8 @@ const Battle = () => {
         </div>
       </div>
       <PlayerInfo player={player1} playerIcon={p01Icon} mt />
-	
-	// game info data
+
+      {/* game info data */}
       <GameInfo />
     </div>
   );
