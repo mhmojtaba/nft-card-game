@@ -80,10 +80,10 @@ const Battle = () => {
 
   return (
     <div
-      className={`${styles.flexBetween} ${styles.gameContainer} ${battleGround}`}
+      className={`${styles.flexBetween} ${styles.gameContainer} ${battleGround} h-full`}
     >
       <PlayerInfo player={player2} playerIcon={p02Icon} mt />
-      <div className={`flex-col my-10 ${styles.flexCenter}`}>
+      <div className={`flex-col sm:flex-row my-10 ${styles.flexCenter}`}>
         <Card card={player2} title={player2?.playerName} cardRef="" playerTwo />
         <div className=" flex items-center flex-row">
           <ActionButton
