@@ -22,6 +22,7 @@ const Battle = () => {
   const [player1, setPlayer1] = useState({});
   const [player2, setPlayer2] = useState({});
   const { battleName } = useParams();
+  // console.log(battleName);
 
   // getting player info
   // biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
@@ -78,6 +79,19 @@ const Battle = () => {
     if (contract && gameData.activeBattle) getPlayerInfo();
   }, [contract, battleName, gameData]);
 
+  const makeAMove = async (move) => {
+    playAudio(move === 1 ? attackSound : defenseSound);
+
+    try {
+      await contract.attackOrDefendChoice(move, battleName);
+
+      toast.success(`choosing ${move === 1 ? "attack" : "defense"}`);
+    } catch (error) {
+      console.log(error?.message);
+      toast.error(error?.message);
+    }
+  };
+
   return (
     <div
       className={`${styles.flexBetween} ${styles.gameContainer} ${battleGround} h-full`}
@@ -88,7 +102,7 @@ const Battle = () => {
         <div className=" flex items-center flex-row">
           <ActionButton
             img={attack}
-            clickHandler={() => {}}
+            clickHandler={() => makeAMove(1)}
             restStyles="mr-2 hover:border-yellow-400"
           />
           <Card
@@ -99,7 +113,7 @@ const Battle = () => {
           />
           <ActionButton
             img={defense}
-            clickHandler={() => {}}
+            clickHandler={() => makeAMove(2)}
             restStyles="ml-2 hover:border-red-500"
           />
         </div>

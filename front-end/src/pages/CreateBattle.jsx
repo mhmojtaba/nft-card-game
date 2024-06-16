@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable react-refresh/only-export-components */
 
 import { Link } from "react-router-dom";
@@ -11,9 +12,10 @@ const CreateNewBattle = () => {
   const { contract, battleName, setBattleName, gameData } = useGlobalContext();
   const [wait, setWait] = useState(false);
 
-  // biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
   useEffect(() => {
-    if (gameData?.activeBattle?.battleStatus === 0) setWait(true);
+    if (gameData?.activeBattle?.battleStatus === 1) {
+      navigator(`/battle/${gameData?.activeBattle?.name}`);
+    } else if (gameData?.activeBattle?.battleStatus === 0) setWait(true);
   }, [gameData]);
 
   const createBattleHandler = async () => {

@@ -337,7 +337,7 @@ contract AVAXGodsGame is ERC1155, Ownable, ERC1155Supply{
     }
 
     // User chooses attack or defense move for battle
-    function attackOrDefense(string memory _name , uint8 _choice) external {
+    function attackOrDefendChoice(string memory _name , uint8 _choice) external {
         Battle memory _battle = getBattle(_name);
         require(_battle.battleStatus == BattleStatus.STARTED, "battle not started yet!!!");
         require(_battle.battleStatus == BattleStatus.ENDED, "battle had already ended!!!");

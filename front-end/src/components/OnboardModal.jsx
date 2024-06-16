@@ -1,10 +1,10 @@
-import { useState, useEffect } from 'react';
-import Modal from 'react-modal';
+import { useState, useEffect } from "react";
+import Modal from "react-modal";
 
-import styles from '../styles';
-import { CustomButton } from '.';
-import { useGlobalContext } from '../context';
-import { GetParams, SwitchNetwork } from '../utils/onboard.js';
+import styles from "../styles";
+import { CustomButton } from ".";
+import { useGlobalContext } from "../context";
+import { GetParams, SwitchNetwork } from "../utils/onboard.js";
 
 const OnboardModal = () => {
   const [modalIsOpen, setIsOpen] = useState(false);
@@ -17,14 +17,15 @@ const OnboardModal = () => {
     setIsOpen(currentStep.step !== -1);
   }
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
   useEffect(() => {
     resetParams();
 
-    window?.ethereum?.on('chainChanged', () => {
+    window?.ethereum?.on("chainChanged", () => {
       resetParams();
     });
 
-    window?.ethereum?.on('accountsChanged', () => {
+    window?.ethereum?.on("accountsChanged", () => {
       resetParams();
     });
   }, []);
@@ -35,11 +36,11 @@ const OnboardModal = () => {
         return (
           <>
             <p className={styles.modalText}>
-              You don't have Core Wallet installed!
+              You don&apos;t have Core Wallet installed!
             </p>
             <CustomButton
               title="Download Core"
-              handleClick={() => window.open('https://core.app/', '_blank')}
+              clickHandler={() => window.open("https://core.app/", "_blank")}
             />
           </>
         );
@@ -48,11 +49,11 @@ const OnboardModal = () => {
         return (
           <>
             <p className={styles.modalText}>
-              You haven't connected your account to Core Wallet!
+              You haven&apos;t connected your account to Core Wallet!
             </p>
             <CustomButton
               title="Connect Account"
-              handleClick={updateCurrentWalletAddress}
+              clickHandler={updateCurrentWalletAddress}
             />
           </>
         );
@@ -61,9 +62,9 @@ const OnboardModal = () => {
         return (
           <>
             <p className={styles.modalText}>
-              You're on a different network. Switch to Fuji C-Chain.
+              You&apos;re on a different network. Switch to Fuji C-Chain.
             </p>
-            <CustomButton title="Switch" handleClick={SwitchNetwork} />
+            <CustomButton title="Switch" clickHandler={SwitchNetwork} />
           </>
         );
 
@@ -71,11 +72,14 @@ const OnboardModal = () => {
         return (
           <>
             <p className={styles.modalText}>
-              Oops, you don't have AVAX tokens in your account
+              Oops, you don&apos;t have AVAX tokens in your account
             </p>
             <CustomButton
               title="Grab some test tokens"
-              handleClick={() => window.open('https://faucet.avax.network/', '_blank')}
+              clickHandler={(e) => {
+                e.preventDefault();
+                window.open("https://faucet.avax.network/", "_blank");
+              }}
             />
           </>
         );
@@ -88,7 +92,7 @@ const OnboardModal = () => {
   return (
     <Modal
       isOpen={modalIsOpen}
-      className={`absolute inset-0 ${styles.flexCenter} flex-col ${styles.glassEffect}`}
+      className={`absolute z-50 inset-0 ${styles.flexCenter} flex-col ${styles.glassEffect}`}
       overlayClassName="Overlay"
     >
       {generateStep(step)}

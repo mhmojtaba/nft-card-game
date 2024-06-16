@@ -9,6 +9,7 @@ import { ABI, ADDRESS } from "../contract";
 import toast from "react-hot-toast";
 import { createEventsListeners } from "./eventListeners";
 import { useNavigate } from "react-router-dom";
+import { GetParams } from "../utils/onboard";
 
 const GlobalContext = createContext();
 
@@ -24,8 +25,22 @@ export const GlobalContextProvider = ({ children }) => {
   });
   const [updateGameData, setUpdateGameData] = useState(0);
   const [battleGround, setBattleGround] = useState("bg-astral");
+  const [step, setStep] = useState(1);
 
   const navigate = useNavigate();
+
+  /// reset onboard modal
+  useEffect(() => {
+    const resetParams = async () => {
+      const currentStep = await GetParams();
+      setStep(currentStep.step);
+    };
+
+    resetParams();
+
+    window?.ethereum?.on("accountsChanged", () => resetParams());
+    window?.ethereum?.on("chainChanged", () => resetParams());
+  }, []);
 
   // * set the wallet address
   const updateWalletAddress = async () => {
@@ -40,6 +55,16 @@ export const GlobalContextProvider = ({ children }) => {
       toast.error(error?.message);
     }
   };
+
+  // biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
+  useEffect(() => {
+    const currentBattleGround = localStorage.getItem("battleGround");
+    if (currentBattleGround) {
+      setBattleGround(currentBattleGround);
+    } else {
+      localStorage.setItem("battleGround", battleGround);
+    }
+  }, []);
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
   useEffect(() => {
@@ -72,7 +97,7 @@ export const GlobalContextProvider = ({ children }) => {
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
   useEffect(() => {
-    if (contract) {
+    if (step !== -1 && contract) {
       createEventsListeners({
         navigate,
         contract,
@@ -81,7 +106,7 @@ export const GlobalContextProvider = ({ children }) => {
         setUpdateGameData,
       });
     }
-  }, [contract]);
+  }, [contract, step]);
 
   //* set the game data
   // biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>

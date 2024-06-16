@@ -6,6 +6,7 @@ import GameLoad from "./GameLoad";
 import HOC from "./HOC";
 import PlayerInfo from "./PlayerInfo";
 import GameInfo from "./GameInfo";
+import OnboardModal from "./OnboardModal";
 
 export {
   HOC,
@@ -16,4 +17,5 @@ export {
   Card,
   PlayerInfo,
   GameInfo,
+  OnboardModal,
 };

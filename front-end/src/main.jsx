@@ -5,10 +5,12 @@ import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { Battle, Battleground, CreateNewBattle, JoinBattle } from "./pages";
 import { GlobalContextProvider } from "./context";
 import { Toaster } from "react-hot-toast";
+import { OnboardModal } from "./components";
 
 ReactDOM.createRoot(document.getElementById("root")).render(
   <BrowserRouter>
     <GlobalContextProvider>
+      <OnboardModal />
       <Routes>
         <Route path="/" element={<App />} />
         <Route path="/create-battle" element={<CreateNewBattle />} />
