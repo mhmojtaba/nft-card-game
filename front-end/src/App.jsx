@@ -7,7 +7,7 @@ import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
 
 function App() {
-  const { walletAddress, contract } = useGlobalContext();
+  const { walletAddress, contract, gameData } = useGlobalContext();
   const [playerName, setPlayerName] = useState("");
   const navigate = useNavigate();
   // console.log(walletAddress);
@@ -27,6 +27,7 @@ function App() {
     }
   };
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
   useEffect(() => {
     const checkPlayerToken = async () => {
       const playerExists = await contract.isPlayer(walletAddress);
@@ -37,6 +38,13 @@ function App() {
 
     if (contract) checkPlayerToken();
   }, [contract]);
+
+  // biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
+  useEffect(() => {
+    if (gameData.activeBattle) {
+      navigate(`battle/${gameData.activeBattle.name}`);
+    }
+  }, [gameData]);
 
   return (
     <div className="flex flex-col">

@@ -6,13 +6,24 @@ import { alertIcon, gameRules } from "../assets";
 import styles from "../styles";
 import { useState } from "react";
 import ReactTooltip from "react-tooltip";
+import toast from "react-hot-toast";
 
 const GameInfo = () => {
   const { contract, gameData } = useGlobalContext();
   const [toggleSidebar, setToggleSidebar] = useState(false);
   const navigate = useNavigate();
 
-  const handleBattleExit = async () => {};
+  const handleBattleExit = async () => {
+    const battleName = gameData.activeBattle.name;
+
+    try {
+      await contract.quitBattle(battleName);
+
+      toast.success(`Battle ${battleName} ended`);
+    } catch (error) {
+      toast.error(error?.message);
+    }
+  };
 
   return (
     <>

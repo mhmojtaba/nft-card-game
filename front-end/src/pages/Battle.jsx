@@ -17,11 +17,19 @@ import toast from "react-hot-toast";
 import { ActionButton, Card, GameInfo, PlayerInfo } from "../components";
 
 const Battle = () => {
-  const { contract, gameData, walletAddress, battleGround, setBattleGround } =
-    useGlobalContext();
+  const {
+    contract,
+    gameData,
+    walletAddress,
+    battleGround,
+    setErrorMessage,
+    player1Ref,
+    player2Ref,
+  } = useGlobalContext();
   const [player1, setPlayer1] = useState({});
   const [player2, setPlayer2] = useState({});
   const { battleName } = useParams();
+  const navigate = useNavigate();
   // console.log(battleName);
 
   // getting player info
@@ -83,14 +91,29 @@ const Battle = () => {
     playAudio(move === 1 ? attackSound : defenseSound);
 
     try {
-      await contract.attackOrDefendChoice(move, battleName);
+      await contract.attackOrDefendChoice(move, battleName, {
+        gasLimit: 200000,
+      });
 
       toast.success(`choosing ${move === 1 ? "attack" : "defense"}`);
     } catch (error) {
       console.log(error?.message);
       toast.error(error?.message);
+      setErrorMessage(error);
     }
   };
+
+  /// check if the battle ended
+  // biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (!gameData?.activeBattle) {
+        navigate("/");
+      }
+    }, [1000]);
+
+    return () => clearTimeout(timer);
+  }, []);
 
   return (
     <div
@@ -98,7 +121,12 @@ const Battle = () => {
     >
       <PlayerInfo player={player2} playerIcon={p02Icon} mt />
       <div className={`flex-col sm:flex-row my-10 ${styles.flexCenter}`}>
-        <Card card={player2} title={player2?.playerName} cardRef="" playerTwo />
+        <Card
+          card={player2}
+          title={player2?.playerName}
+          cardRef={player2Ref}
+          playerTwo
+        />
         <div className=" flex items-center flex-row">
           <ActionButton
             img={attack}
@@ -108,7 +136,7 @@ const Battle = () => {
           <Card
             card={player1}
             title={player1?.playerName}
-            cardRef=""
+            cardRef={player1Ref}
             restStyles="mt-4"
           />
           <ActionButton

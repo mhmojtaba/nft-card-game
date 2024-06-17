@@ -13,7 +13,7 @@ const image2 = generateRandomCardImg();
 const Card = ({ card, title, cardRef, playerTwo, restStyles }) => {
   return (
     <ReactParallaxTilt>
-      <div className={`${styles.cardContainer} ${restStyles}`}>
+      <div className={`${styles.cardContainer} ${restStyles}`} ref={cardRef}>
         <img
           src={playerTwo ? image2 : image1}
           alt="card"

@@ -506,6 +506,15 @@ contract AVAXGodsGame is ERC1155, Ownable, ERC1155Supply{
 
     ///  end the battle
 
+
+    function quitBattle(string memory _name) public {
+        Battle memory battle = getBattle(_name);
+
+        require(battle.players[0] == msg.sender || battle.players[1] == msg.sender , "You're not in the battle");
+
+        battle.players[0] == msg.sender ? _endBattle( battle.players[1] , _name) : _endBattle( battle.players[0] , _name);
+    }
+
     function _endBattle(
         address battleEnder,
         Battle memory _battle

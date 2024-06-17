@@ -1,14 +1,24 @@
 /* eslint-disable no-unused-vars */
 /* eslint-disable react-refresh/only-export-components */
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { CustomButton, HOC } from "../components";
 import styles from "../styles";
 import { useGlobalContext } from "../context";
 import toast from "react-hot-toast";
+import { useEffect } from "react";
 
 const JoinBattle = () => {
   const { contract, gameData, walletAddress, battleName, setBattleName } =
     useGlobalContext();
+
+  const navigate = useNavigate();
+
+  // biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
+  useEffect(() => {
+    if (gameData?.activeBattle?.battleStatus === 1) {
+      navigate(`/battle/${gameData.activeBattle.name}`);
+    }
+  }, [gameData]);
 
   const joinBattleHandler = async (name) => {
     setBattleName(name);

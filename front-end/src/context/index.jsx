@@ -2,7 +2,7 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable react/prop-types */
 /* eslint-disable react-refresh/only-export-components */
-import { useState, useEffect, createContext, useContext } from "react";
+import { useState, useEffect, createContext, useContext, useRef } from "react";
 import { ethers } from "ethers";
 import Web3modal from "web3modal";
 import { ABI, ADDRESS } from "../contract";
@@ -26,6 +26,10 @@ export const GlobalContextProvider = ({ children }) => {
   const [updateGameData, setUpdateGameData] = useState(0);
   const [battleGround, setBattleGround] = useState("bg-astral");
   const [step, setStep] = useState(1);
+  const [errorMessage, setErrorMessage] = useState("");
+
+  const player1Ref = useRef();
+  const player2Ref = useRef();
 
   const navigate = useNavigate();
 
@@ -104,9 +108,23 @@ export const GlobalContextProvider = ({ children }) => {
         provider,
         walletAddress,
         setUpdateGameData,
+        player1Ref,
+        player2Ref,
       });
     }
   }, [contract, step]);
+
+  /// handle errors
+  useEffect(() => {
+    if (errorMessage) {
+      const parsedErrorMessage = errorMessage?.reason
+        ?.slice("execution reverted ".length)
+        .slice(0, -1);
+      if (parsedErrorMessage) {
+        toast.error(parsedErrorMessage);
+      }
+    }
+  }, [errorMessage]);
 
   //* set the game data
   // biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
@@ -149,6 +167,11 @@ export const GlobalContextProvider = ({ children }) => {
         gameData,
         battleGround,
         setBattleGround,
+        errorMessage,
+        setErrorMessage,
+        player1Ref,
+        player2Ref,
+        updateWalletAddress,
       }}
     >
       {children}

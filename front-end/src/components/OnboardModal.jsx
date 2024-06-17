@@ -8,7 +8,7 @@ import { GetParams, SwitchNetwork } from "../utils/onboard.js";
 
 const OnboardModal = () => {
   const [modalIsOpen, setIsOpen] = useState(false);
-  const { updateCurrentWalletAddress } = useGlobalContext();
+  const { updateWalletAddress } = useGlobalContext();
   const [step, setStep] = useState(-1);
 
   async function resetParams() {
@@ -53,7 +53,7 @@ const OnboardModal = () => {
             </p>
             <CustomButton
               title="Connect Account"
-              clickHandler={updateCurrentWalletAddress}
+              clickHandler={updateWalletAddress}
             />
           </>
         );
